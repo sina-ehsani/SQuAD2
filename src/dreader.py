@@ -1,5 +1,5 @@
 '''
-SAN model + Domain Adoptation + Elmo
+SAN model + Domain Adaptation + Elmo 
 Modified November, 2018
 Edited by: sina.ehsani@email.arizona.edu
 Originally Created by: xiaodl@microsoft.com
