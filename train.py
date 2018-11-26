@@ -53,7 +53,12 @@ def main():
     if args.v2_on:
         version = 'v2'
         gold_version = 'v2.0'
-        dev_labels = load_squad_v2_label(args.dev_gold)
+        dev_gold_path="./data/dev-v2.0.json"
+        dev_labels = load_squad_v2_label(dev_gold_path)
+        dev_path = gen_name(args.data_dir, args.dev_data, version)
+        dev_gold_path = gen_gold_name(args.data_dir, args.dev_gold, gold_version)
+        test_path = gen_name(args.data_dir, args.test_data, version)
+        test_gold_path = gen_gold_name(args.data_dir, args.test_gold, gold_version)
 
     embedding, opt = load_meta(opt, gen_name(args.data_dir, args.meta, version, suffix='pick'))
     train_data = BatchGen(gen_name(args.data_dir, args.train_data, version),
