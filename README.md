@@ -76,7 +76,7 @@ train a Model with ELMo
    > python train2.py --v2_on
 
 ## Notes and Acknowledgments
-Most defentions were imported from: https://github.com/kevinduh/san_mrc
+Most defentions were imported from: https://github.com/kevinduh/san_mrc <br/>
 Some of code are adapted from: https://github.com/hitvoice/DrQA <br/>
 ELMo is from: https://allennlp.org
 
