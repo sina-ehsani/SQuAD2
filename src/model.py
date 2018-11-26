@@ -1,7 +1,8 @@
 '''
 High level of model for training and prediction
-Created October, 2017
-Author: xiaodl@microsoft.com
+Modified November, 2018
+Edited by: sina.ehsani@email.arizona.edu
+Originally Created by: xiaodl@microsoft.com
 '''
 
 
@@ -89,9 +90,10 @@ class DocReaderModel(object):
                 label = Variable(batch['label'], requires_grad=False)
 
         start, end, pred = self.network(batch)
+        # assert (input >= 0. & input <= 1.).all()
         loss = F.cross_entropy(start, y[0]) + F.cross_entropy(end, y[1])
         if self.opt.get('v2_on', False):
-            loss = loss + F.binary_cross_entropy(pred, torch.unsqueeze(label, 1)) * self.opt.get('classifier_gamma', 1)
+            loss = loss + F.binary_cross_entropy_with_logits(pred, torch.unsqueeze(label, 1)) * self.opt.get('classifier_gamma', 1)
 
         self.train_loss.update(loss.item(), len(start))
         self.optimizer.zero_grad()
