@@ -1,72 +1,83 @@
 # Stochastic Answer Networks for Machine Reading Comprehension
 
-This PyTorch package implements the Stochastic Answer Network (SAN) for Machine Reading Comprehension, as described in:
+Three ways have been provided to run this program: (each is explained separatley.)
+1. Using the codes directly from GitHub repository.
+2. Using Docker container.
+3. Using Singularity Hub for HPC systems.
 
-Xiaodong Liu, Yelong Shen, Kevin Duh, Jianfeng Gao<br/>
-Stochastic Answer Networks for Machine Reading Comprehension<br/>
-Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)<br/>
-[arXiv version](https://arxiv.org/abs/1712.03556)
+### 1. GetHub Clone
 
+For this method the following packages should be installed (using pip) :(you can use the setup environment provided)
++ Python (version 3.6)
++ PyTorch (0.4.0)
++ spaCy (2.0.12)
++ pandas==0.22.0
++ tqm
++ colorlog
++ allennlp
 
-Xiaodong Liu, Wei Li, Yuwei Fang, Aerin Kim, Kevin Duh and Jianfeng Gao<br/>
-Stochastic Answer Networks for SQuAD 2.0 <br/>
-Technical Report
-[arXiv version](https://arxiv.org/abs/1809.09194)
+In addition you have to have following packages (install using apt-get and be sure your apt-get is uptodate : `apt-get update` ):
++ wget
++ unzip
 
-
-Please cite the above papers if you use this code. 
-
-## Quickstart 
-
-### Setup Environment
+#### Setup Environment
 1. python3.6
-2. install requirements:
+2. Clone the GitHub repository:
+   > git clone https://github.com/sinaehsani6/SQuAD2
+3. install all requirements:
    > pip install -r requirements.txt
-3. download data/word2vec 
+4. download all the data/word2vec 
    > sh download.sh
-4. You might need to download the en module for spacy
-   > python -m spacy download en              # default English model (~50MB) <br/>
-   > python -m spacy download en_core_web_md  # larger English model (~1GB)
 
-### Train a SAN Model on SQuAD v1.1
-1. preprocess data
-   > python prepro.py
-2. train a model
-   > python train.py
+### 2. Docker Container
 
-### Train a SAN Model on SQuAD v2.0
+If you wan't to use the docker containers, you can download the docker containers from [here](https://www.docker.com/community-edition#/download).
+
+1. Pull the docker file:
+   > docker pull sinaehsani/sansrc_new:1st
+
+2. Run the docker image:
+   > docker run -it sinaehsani/sansrc_new:1st
+
+3. Then you need to download the data/word2vec:
+   > sh download.sh
+  
+### 3. Singularity Hub
+
+For an easier run on HPC systems (HPC systems do not support Docker containers), a singularity hub is established for an easier use, to run the singularity hub, use the following codes (it is likley that you may face some issues running the program this way. To solve this problem you sould use the singularity hub to trigger a container first, please look at https://github.com/sinaehsani6/dockertosing to see a singularity recepie example):
+
+1. Pull the singularity file:
+   > singularity pull shub://sinaehsani6/dockertosing
+
+2. Run the singularity image:
+   > singularity shell sinaehsani6-dockertosing-master-latest.simg 
+   
+3. Clone the GitHub repository:
+   > git clone https://github.com/sinaehsani6/SQuAD2
+   
+4. Then you need to download the data/word2vec:
+   > sh download.sh
+ 
+
+### Train the Model on SQuAD v2.0
 1. preprocess data
    > python prepro.py --v2_on
 2. train a Model
-   > python train.py --v2_on --dev_gold data\dev-v2.0.json
+   > python train.py --v2_on
 
 ### Use of ELMo
-1. download ELMo resource from AllenNLP
-2. train a Model with ELMo
-   > python train.py --elmo_on
+train a Model with ELMo
+   > python train.py --elmo_on --v2_on
 
-Note that we only tested on SQuAD v1.1.
-
-## TODO
-1. Multi-Task Training.
-2. Add BERT.
+### Train the Model on the diffrent preprocessed data (see section 4.1 of the paper)
+1. preprocess data
+   > python prepro2.py --v2_on
+2. train a Model
+   > python train2.py --v2_on
 
 ## Notes and Acknowledgments
+Most defentions were imported from: https://github.com/kevinduh/san_mrc
 Some of code are adapted from: https://github.com/hitvoice/DrQA <br/>
 ELMo is from: https://allennlp.org
-
-## Results
-We report results produced by this package as follows.
-
-| Dataset | EM/F1 on Dev |
-| ------- | ------- |
-| `SQuAD v1.1` (Rajpurkar et al., 2016) | **76.8**/**84.6** (vs 76.2/84.1 SAN paper) |
-| `SQuAD v2.0`  (Rajpurkar et al., 2018)| **69.5**/**72.7** (<a href="https://worksheets.codalab.org/worksheets/0x5d6dd1b40dcf406581bb29be15016628/">Official Submission of SQUAD v2</a>)|
-| `NewsQA` (Trischler et al., 2016)| **55.8**/**67.9**|
-
-
-Related:
-1. <a href="https://arxiv.org/abs/1809.06963">Multi-Task Learning for MRC</a>
-2. <a href="https://arxiv.org/abs/1804.07888">NLI</a>
 
 
