@@ -1,7 +1,9 @@
 '''
 Lexicon encoding layer
 Created October, 2017
-Author: xiaodl@microsoft.com
+Modified November, 2018
+Edited by: sina.ehsani@email.arizona.edu
+Originally Created by: xiaodl@microsoft.com
 '''
 
 import torch
@@ -131,6 +133,11 @@ class LexiconEncoder(nn.Module):
         doc_mask = self.patch(batch['doc_mask'])
         query_tok = self.patch(batch['query_tok'])
         query_mask = self.patch(batch['query_mask'])
+        # query_label = self.patch(batch['label'])
+        if 'label' in batch.keys():
+            query_label = self.patch(batch['label'])
+        else:
+            query_label=None
 
         doc_emb, query_emb = emb(doc_tok), emb(query_tok)
         # Dropout on embeddings
@@ -193,4 +200,4 @@ class LexiconEncoder(nn.Module):
             doc_input = self.doc_pwnn(doc_input)
             query_input = self.que_pwnn(query_input)
 
-        return doc_input, query_input, doc_emb, query_emb, doc_cove_low, doc_cove_high, query_cove_low, query_cove_high, doc_mask, query_mask, doc_elmo, query_elmo
+        return doc_input, query_input, doc_emb, query_emb, doc_cove_low, doc_cove_high, query_cove_low, query_cove_high, doc_mask, query_mask, doc_elmo, query_elmo, query_label
