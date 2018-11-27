@@ -1,0 +1,361 @@
+2018-11-26 03:17:55 INFO     [Launching the SAN]
+2018-11-26 03:17:55 INFO     [Loading data]
+Loaded 130319 samples out of 130319
+Loaded 11873 samples out of 11873
+2018-11-26 03:18:33 INFO     [
+############# Model Arch of SAN #############
+DNetwork(
+  (dropout): DropoutWrapper()
+  (lexicon_encoder): LexiconEncoder(
+    (dropout): DropoutWrapper()
+    (dropout_emb): DropoutWrapper()
+    (dropout_cove): DropoutWrapper()
+    (elmo): Elmo(
+      (_elmo_lstm): _ElmoBiLm(
+        (_token_embedder): _ElmoCharacterEncoder(
+          (char_conv_0): Conv1d(16, 32, kernel_size=(1,), stride=(1,))
+          (char_conv_1): Conv1d(16, 32, kernel_size=(2,), stride=(1,))
+          (char_conv_2): Conv1d(16, 64, kernel_size=(3,), stride=(1,))
+          (char_conv_3): Conv1d(16, 128, kernel_size=(4,), stride=(1,))
+          (char_conv_4): Conv1d(16, 256, kernel_size=(5,), stride=(1,))
+          (char_conv_5): Conv1d(16, 512, kernel_size=(6,), stride=(1,))
+          (char_conv_6): Conv1d(16, 1024, kernel_size=(7,), stride=(1,))
+          (_highways): Highway(
+            (_layers): ModuleList(
+              (0): Linear(in_features=2048, out_features=4096, bias=True)
+              (1): Linear(in_features=2048, out_features=4096, bias=True)
+            )
+          )
+          (_projection): Linear(in_features=2048, out_features=512, bias=True)
+        )
+        (_elmo_lstm): ElmoLstm(
+          (forward_layer_0): LstmCellWithProjection(
+            (input_linearity): Linear(in_features=512, out_features=16384, bias=False)
+            (state_linearity): Linear(in_features=512, out_features=16384, bias=True)
+            (state_projection): Linear(in_features=4096, out_features=512, bias=False)
+          )
+          (backward_layer_0): LstmCellWithProjection(
+            (input_linearity): Linear(in_features=512, out_features=16384, bias=False)
+            (state_linearity): Linear(in_features=512, out_features=16384, bias=True)
+            (state_projection): Linear(in_features=4096, out_features=512, bias=False)
+          )
+          (forward_layer_1): LstmCellWithProjection(
+            (input_linearity): Linear(in_features=512, out_features=16384, bias=False)
+            (state_linearity): Linear(in_features=512, out_features=16384, bias=True)
+            (state_projection): Linear(in_features=4096, out_features=512, bias=False)
+          )
+          (backward_layer_1): LstmCellWithProjection(
+            (input_linearity): Linear(in_features=512, out_features=16384, bias=False)
+            (state_linearity): Linear(in_features=512, out_features=16384, bias=True)
+            (state_projection): Linear(in_features=4096, out_features=512, bias=False)
+          )
+        )
+      )
+      (_dropout): Dropout(p=0.5)
+      (scalar_mix_0): ScalarMix(
+        (scalar_parameters): ParameterList(
+            (0): Parameter containing: [torch.FloatTensor of size 1]
+            (1): Parameter containing: [torch.FloatTensor of size 1]
+            (2): Parameter containing: [torch.FloatTensor of size 1]
+        )
+      )
+      (scalar_mix_1): ScalarMix(
+        (scalar_parameters): ParameterList(
+            (0): Parameter containing: [torch.FloatTensor of size 1]
+            (1): Parameter containing: [torch.FloatTensor of size 1]
+            (2): Parameter containing: [torch.FloatTensor of size 1]
+        )
+      )
+      (scalar_mix_2): ScalarMix(
+        (scalar_parameters): ParameterList(
+            (0): Parameter containing: [torch.FloatTensor of size 1]
+            (1): Parameter containing: [torch.FloatTensor of size 1]
+            (2): Parameter containing: [torch.FloatTensor of size 1]
+        )
+      )
+    )
+    (embedding): Embedding(90953, 300, padding_idx=0)
+    (ContextualEmbed): ContextualEmbed(
+      (embedding): Embedding(90953, 300, padding_idx=0)
+      (rnn1): LSTM(300, 300, bidirectional=True)
+      (rnn2): LSTM(600, 300, bidirectional=True)
+    )
+    (prealign): AttentionWrapper(
+      (score_func): SimilarityWrapper(
+        (score_func): DotProductProject(
+          (dropout): DropoutWrapper()
+          (proj_1): Linear(in_features=300, out_features=128, bias=False)
+          (proj_2): Linear(in_features=300, out_features=128, bias=False)
+        )
+      )
+    )
+    (pos_embedding): Embedding(54, 12, padding_idx=0)
+    (ner_embedding): Embedding(41, 8, padding_idx=0)
+    (doc_pwnn): PositionwiseNN(
+      (w_0): Conv1d(1224, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+    (que_pwnn): PositionwiseNN(
+      (w_0): Conv1d(900, 256, kernel_size=(1,), stride=(1,))
+      (w_1): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+      (dropout): DropoutWrapper()
+    )
+  )
+  (doc_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1880, 128, bidirectional=True)
+  )
+  (doc_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1880, 128, bidirectional=True)
+  )
+  (query_encoder_low): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1880, 128, bidirectional=True)
+  )
+  (query_encoder_high): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1880, 128, bidirectional=True)
+  )
+  (query_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (deep_attn): DeepAttentionWrapper(
+    (dropout): DropoutWrapper()
+    (attn_list): ModuleList(
+      (0): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+            (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+          )
+        )
+      )
+      (1): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+            (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+          )
+        )
+      )
+      (2): AttentionWrapper(
+        (score_func): SimilarityWrapper(
+          (score_func): DotProductProject(
+            (dropout): DropoutWrapper()
+            (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+            (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+          )
+        )
+      )
+    )
+  )
+  (doc_understand): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(1280, 128, bidirectional=True)
+  )
+  (doc_self_attn): AttentionWrapper(
+    (score_func): SimilarityWrapper(
+      (score_func): DotProductProject(
+        (dropout): DropoutWrapper()
+        (proj_1): Linear(in_features=2436, out_features=128, bias=False)
+        (proj_2): Linear(in_features=2436, out_features=128, bias=False)
+      )
+    )
+  )
+  (doc_mem_gen): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(512, 128, bidirectional=True)
+  )
+  (query_domain_mem): OneLayerBRNN(
+    (dropout): DropoutWrapper()
+    (rnn): LSTM(768, 128, bidirectional=True)
+  )
+  (query_sum_attn): SelfAttnWrapper(
+    (att): LinearSelfAttn(
+      (linear): Linear(in_features=256, out_features=1, bias=True)
+      (dropout): DropoutWrapper()
+    )
+  )
+  (decoder): SAN(
+    (attn_b): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (attn_e): FlatSimilarityWrapper(
+      (att_dropout): DropoutWrapper()
+      (score_func): BilinearFlatSim(
+        (linear): Linear(in_features=256, out_features=256, bias=True)
+        (dropout): DropoutWrapper()
+      )
+    )
+    (rnn): GRUCell(256, 256)
+    (dropout): DropoutWrapper()
+  )
+  (doc_sum_attn): SelfAttnWrapper(
+    (att): LinearSelfAttn(
+      (linear): Linear(in_features=256, out_features=1, bias=True)
+      (dropout): DropoutWrapper()
+    )
+  )
+  (classifier): Classifier(
+    (dropout): DropoutWrapper()
+    (proj): Linear(in_features=512, out_features=1, bias=True)
+  )
+)
+]
+2018-11-26 03:18:33 INFO     [Total number of params: 14701889]
+2018-11-26 03:18:38 WARNING  [At epoch 0]
+2018-11-26 03:18:39 INFO     [#updates[     1] train loss[10.83569] remaining[0:53:00]]
+2018-11-26 03:19:56 INFO     [#updates[   100] train loss[6.61337] remaining[0:51:07]]
+2018-11-26 03:21:13 INFO     [#updates[   200] train loss[6.28620] remaining[0:50:02]]
+2018-11-26 03:22:30 INFO     [#updates[   300] train loss[6.16164] remaining[0:48:32]]
+2018-11-26 03:23:51 INFO     [#updates[   400] train loss[6.05171] remaining[0:47:52]]
+2018-11-26 03:25:15 INFO     [#updates[   500] train loss[5.88856] remaining[0:47:10]]
+2018-11-26 03:26:32 INFO     [#updates[   600] train loss[5.82973] remaining[0:45:42]]
+2018-11-26 03:27:53 INFO     [#updates[   700] train loss[5.76987] remaining[0:44:33]]
+2018-11-26 03:29:17 INFO     [#updates[   800] train loss[5.69028] remaining[0:43:30]]
+2018-11-26 03:30:32 INFO     [#updates[   900] train loss[5.64508] remaining[0:41:54]]
+2018-11-26 03:31:50 INFO     [#updates[  1000] train loss[5.60630] remaining[0:40:33]]
+2018-11-26 03:33:10 INFO     [#updates[  1100] train loss[5.55642] remaining[0:39:16]]
+2018-11-26 03:34:28 INFO     [#updates[  1200] train loss[5.55438] remaining[0:37:52]]
+2018-11-26 03:35:48 INFO     [#updates[  1300] train loss[5.54013] remaining[0:36:35]]
+2018-11-26 03:37:02 INFO     [#updates[  1400] train loss[5.48054] remaining[0:35:06]]
+2018-11-26 03:38:22 INFO     [#updates[  1500] train loss[5.45295] remaining[0:33:49]]
+2018-11-26 03:39:43 INFO     [#updates[  1600] train loss[5.41214] remaining[0:32:34]]
+2018-11-26 03:41:03 INFO     [#updates[  1700] train loss[5.38735] remaining[0:31:16]]
+2018-11-26 03:42:22 INFO     [#updates[  1800] train loss[5.36641] remaining[0:29:57]]
+2018-11-26 03:43:40 INFO     [#updates[  1900] train loss[5.35751] remaining[0:28:37]]
+2018-11-26 03:44:58 INFO     [#updates[  2000] train loss[5.33602] remaining[0:27:17]]
+2018-11-26 03:46:16 INFO     [#updates[  2100] train loss[5.31054] remaining[0:25:56]]
+2018-11-26 03:47:33 INFO     [#updates[  2200] train loss[5.29819] remaining[0:24:36]]
+2018-11-26 03:48:51 INFO     [#updates[  2300] train loss[5.28750] remaining[0:23:17]]
+2018-11-26 03:50:08 INFO     [#updates[  2400] train loss[5.28050] remaining[0:21:57]]
+2018-11-26 03:51:24 INFO     [#updates[  2500] train loss[5.27957] remaining[0:20:36]]
+2018-11-26 03:52:43 INFO     [#updates[  2600] train loss[5.26409] remaining[0:19:18]]
+2018-11-26 03:54:00 INFO     [#updates[  2700] train loss[5.24249] remaining[0:17:59]]
+2018-11-26 03:55:22 INFO     [#updates[  2800] train loss[5.21861] remaining[0:16:41]]
+2018-11-26 03:56:42 INFO     [#updates[  2900] train loss[5.21483] remaining[0:15:23]]
+2018-11-26 03:58:02 INFO     [#updates[  3000] train loss[5.20172] remaining[0:14:05]]
+2018-11-26 03:59:22 INFO     [#updates[  3100] train loss[5.17788] remaining[0:12:47]]
+2018-11-26 04:00:43 INFO     [#updates[  3200] train loss[5.16299] remaining[0:11:28]]
+2018-11-26 04:02:04 INFO     [#updates[  3300] train loss[5.15325] remaining[0:10:10]]
+2018-11-26 04:03:22 INFO     [#updates[  3400] train loss[5.14191] remaining[0:08:51]]
+2018-11-26 04:04:43 INFO     [#updates[  3500] train loss[5.13337] remaining[0:07:32]]
+2018-11-26 04:06:05 INFO     [#updates[  3600] train loss[5.12536] remaining[0:06:14]]
+2018-11-26 04:07:28 INFO     [#updates[  3700] train loss[5.11834] remaining[0:04:55]]
+2018-11-26 04:08:46 INFO     [#updates[  3800] train loss[5.10597] remaining[0:03:36]]
+2018-11-26 04:10:07 INFO     [#updates[  3900] train loss[5.09848] remaining[0:02:17]]
+2018-11-26 04:11:23 INFO     [#updates[  4000] train loss[5.08790] remaining[0:00:57]]
+2018-11-26 04:16:32 INFO     [scheduler_type ms]
+2018-11-26 04:16:43 INFO     [Saved the new best model and prediction]
+2018-11-26 04:16:43 WARNING  [Epoch 0 - dev EM: 13.265 F1: 17.405 (best EM: 13.265 F1: 17.405)]
+2018-11-26 04:16:43 WARNING  [Epoch 0 - ACC: 49.9284]
+2018-11-26 04:16:43 WARNING  [Detailed Metric at Epoch 0: OrderedDict([('exact', 13.265392066032174), ('f1', 17.404590546520176), ('total', 11873), ('HasAns_exact', 26.568825910931174), ('HasAns_f1', 34.8590930429882), ('HasAns_total', 5928), ('NoAns_exact', 0.0), ('NoAns_f1', 0.0), ('NoAns_total', 5945)])]
+2018-11-26 04:16:43 WARNING  [At epoch 1]
+2018-11-26 04:16:43 INFO     [#updates[  4074] train loss[5.08471] remaining[0:46:25]]
+2018-11-26 04:17:03 INFO     [#updates[  4100] train loss[5.07818] remaining[0:51:09]]
+2018-11-26 04:18:23 INFO     [#updates[  4200] train loss[5.06723] remaining[0:51:50]]
+2018-11-26 04:19:41 INFO     [#updates[  4300] train loss[5.05970] remaining[0:50:25]]
+2018-11-26 04:20:58 INFO     [#updates[  4400] train loss[5.05010] remaining[0:48:43]]
+2018-11-26 04:22:18 INFO     [#updates[  4500] train loss[5.04189] remaining[0:47:42]]
+2018-11-26 04:23:34 INFO     [#updates[  4600] train loss[5.02920] remaining[0:46:08]]
+2018-11-26 04:24:51 INFO     [#updates[  4700] train loss[5.01754] remaining[0:44:41]]
+2018-11-26 04:26:12 INFO     [#updates[  4800] train loss[5.00003] remaining[0:43:39]]
+2018-11-26 04:27:32 INFO     [#updates[  4900] train loss[4.98801] remaining[0:42:26]]
+2018-11-26 04:28:51 INFO     [#updates[  5000] train loss[4.96957] remaining[0:41:09]]
+2018-11-26 04:30:15 INFO     [#updates[  5100] train loss[4.96141] remaining[0:40:08]]
+2018-11-26 04:31:31 INFO     [#updates[  5200] train loss[4.94692] remaining[0:38:42]]
+2018-11-26 04:32:51 INFO     [#updates[  5300] train loss[4.94408] remaining[0:37:26]]
+2018-11-26 04:34:09 INFO     [#updates[  5400] train loss[4.93103] remaining[0:36:05]]
+2018-11-26 04:35:27 INFO     [#updates[  5500] train loss[4.91855] remaining[0:34:44]]
+2018-11-26 04:36:47 INFO     [#updates[  5600] train loss[4.90384] remaining[0:33:27]]
+2018-11-26 04:38:05 INFO     [#updates[  5700] train loss[4.88918] remaining[0:32:07]]
+2018-11-26 04:39:25 INFO     [#updates[  5800] train loss[4.87915] remaining[0:30:50]]
+2018-11-26 04:40:45 INFO     [#updates[  5900] train loss[4.86558] remaining[0:29:33]]
+2018-11-26 04:42:04 INFO     [#updates[  6000] train loss[4.84993] remaining[0:28:14]]
+2018-11-26 04:43:22 INFO     [#updates[  6100] train loss[4.84159] remaining[0:26:53]]
+2018-11-26 04:44:41 INFO     [#updates[  6200] train loss[4.83515] remaining[0:25:35]]
+2018-11-26 04:46:00 INFO     [#updates[  6300] train loss[4.82240] remaining[0:24:16]]
+2018-11-26 04:47:19 INFO     [#updates[  6400] train loss[4.80994] remaining[0:22:57]]
+2018-11-26 04:48:37 INFO     [#updates[  6500] train loss[4.79630] remaining[0:21:37]]
+2018-11-26 04:49:57 INFO     [#updates[  6600] train loss[4.78716] remaining[0:20:19]]
+2018-11-26 04:51:11 INFO     [#updates[  6700] train loss[4.77045] remaining[0:18:58]]
+2018-11-26 04:52:31 INFO     [#updates[  6800] train loss[4.75577] remaining[0:17:40]]
+2018-11-26 04:53:49 INFO     [#updates[  6900] train loss[4.74433] remaining[0:16:21]]
+2018-11-26 04:55:11 INFO     [#updates[  7000] train loss[4.73364] remaining[0:15:03]]
+2018-11-26 04:56:27 INFO     [#updates[  7100] train loss[4.72405] remaining[0:13:43]]
+2018-11-26 04:57:49 INFO     [#updates[  7200] train loss[4.71102] remaining[0:12:26]]
+2018-11-26 04:59:11 INFO     [#updates[  7300] train loss[4.70112] remaining[0:11:07]]
+2018-11-26 05:00:31 INFO     [#updates[  7400] train loss[4.68974] remaining[0:09:49]]
+2018-11-26 05:01:51 INFO     [#updates[  7500] train loss[4.67599] remaining[0:08:30]]
+2018-11-26 05:03:13 INFO     [#updates[  7600] train loss[4.66312] remaining[0:07:11]]
+2018-11-26 05:04:32 INFO     [#updates[  7700] train loss[4.65194] remaining[0:05:52]]
+2018-11-26 05:05:52 INFO     [#updates[  7800] train loss[4.64175] remaining[0:04:33]]
+2018-11-26 05:07:13 INFO     [#updates[  7900] train loss[4.62800] remaining[0:03:14]]
+2018-11-26 05:08:33 INFO     [#updates[  8000] train loss[4.61478] remaining[0:01:55]]
+2018-11-26 05:09:52 INFO     [#updates[  8100] train loss[4.60063] remaining[0:00:36]]
+2018-11-26 05:14:42 INFO     [scheduler_type ms]
+2018-11-26 05:15:00 INFO     [Saved the new best model and prediction]
+2018-11-26 05:15:00 WARNING  [Epoch 1 - dev EM: 27.609 F1: 32.799 (best EM: 27.609 F1: 32.799)]
+2018-11-26 05:15:00 WARNING  [Epoch 1 - ACC: 49.9284]
+2018-11-26 05:15:00 WARNING  [Detailed Metric at Epoch 1: OrderedDict([('exact', 27.608860439652993), ('f1', 32.798631203450725), ('total', 11873), ('HasAns_exact', 54.52091767881242), ('HasAns_f1', 64.91534215225548), ('HasAns_total', 5928), ('NoAns_exact', 0.7737594617325484), ('NoAns_f1', 0.7737594617325484), ('NoAns_total', 5945)])]
+2018-11-26 05:15:00 WARNING  [At epoch 2]
+2018-11-26 05:15:01 INFO     [#updates[  8147] train loss[4.59417] remaining[0:39:06]]
+2018-11-26 05:15:43 INFO     [#updates[  8200] train loss[4.58672] remaining[0:52:54]]
+2018-11-26 05:17:04 INFO     [#updates[  8300] train loss[4.57436] remaining[0:52:28]]
+2018-11-26 05:18:25 INFO     [#updates[  8400] train loss[4.56134] remaining[0:51:20]]
+2018-11-26 05:19:44 INFO     [#updates[  8500] train loss[4.54739] remaining[0:49:40]]
+2018-11-26 05:21:05 INFO     [#updates[  8600] train loss[4.53706] remaining[0:48:24]]
+2018-11-26 05:22:18 INFO     [#updates[  8700] train loss[4.52230] remaining[0:46:22]]
+2018-11-26 05:23:35 INFO     [#updates[  8800] train loss[4.50789] remaining[0:44:50]]
+2018-11-26 05:24:57 INFO     [#updates[  8900] train loss[4.49653] remaining[0:43:44]]
+2018-11-26 05:26:16 INFO     [#updates[  9000] train loss[4.48448] remaining[0:42:27]]
+2018-11-26 05:27:38 INFO     [#updates[  9100] train loss[4.47270] remaining[0:41:16]]
+2018-11-26 05:28:56 INFO     [#updates[  9200] train loss[4.45955] remaining[0:39:52]]
+2018-11-26 05:30:15 INFO     [#updates[  9300] train loss[4.44659] remaining[0:38:33]]
+2018-11-26 05:31:39 INFO     [#updates[  9400] train loss[4.43408] remaining[0:37:26]]
+2018-11-26 05:33:00 INFO     [#updates[  9500] train loss[4.41997] remaining[0:36:07]]
+2018-11-26 05:34:19 INFO     [#updates[  9600] train loss[4.40750] remaining[0:34:47]]
+2018-11-26 05:35:42 INFO     [#updates[  9700] train loss[4.39804] remaining[0:33:32]]
+2018-11-26 05:37:01 INFO     [#updates[  9800] train loss[4.38686] remaining[0:32:12]]
+2018-11-26 05:38:22 INFO     [#updates[  9900] train loss[4.37581] remaining[0:30:53]]
+2018-11-26 05:39:42 INFO     [#updates[ 10000] train loss[4.36442] remaining[0:29:32]]
+2018-11-26 05:40:57 INFO     [#updates[ 10100] train loss[4.35309] remaining[0:28:08]]
+2018-11-26 05:42:17 INFO     [#updates[ 10200] train loss[4.34245] remaining[0:26:48]]
+2018-11-26 05:43:37 INFO     [#updates[ 10300] train loss[4.33256] remaining[0:25:29]]
+2018-11-26 05:44:54 INFO     [#updates[ 10400] train loss[4.32197] remaining[0:24:07]]
+2018-11-26 05:46:11 INFO     [#updates[ 10500] train loss[4.31190] remaining[0:22:46]]
+2018-11-26 05:47:31 INFO     [#updates[ 10600] train loss[4.30285] remaining[0:21:26]]
+2018-11-26 05:48:51 INFO     [#updates[ 10700] train loss[4.29217] remaining[0:20:07]]
+2018-11-26 05:50:10 INFO     [#updates[ 10800] train loss[4.28263] remaining[0:18:48]]
+2018-11-26 05:51:30 INFO     [#updates[ 10900] train loss[4.27236] remaining[0:17:28]]
+2018-11-26 05:52:50 INFO     [#updates[ 11000] train loss[4.26058] remaining[0:16:09]]
+2018-11-26 05:54:08 INFO     [#updates[ 11100] train loss[4.24832] remaining[0:14:49]]
+2018-11-26 05:55:25 INFO     [#updates[ 11200] train loss[4.23993] remaining[0:13:28]]
+2018-11-26 05:56:44 INFO     [#updates[ 11300] train loss[4.22932] remaining[0:12:09]]
+2018-11-26 05:58:05 INFO     [#updates[ 11400] train loss[4.21895] remaining[0:10:50]]
+2018-11-26 05:59:24 INFO     [#updates[ 11500] train loss[4.21122] remaining[0:09:30]]
+2018-11-26 06:00:45 INFO     [#updates[ 11600] train loss[4.20109] remaining[0:08:11]]
+2018-11-26 06:02:01 INFO     [#updates[ 11700] train loss[nan] remaining[0:06:51]]
+2018-11-26 06:03:19 INFO     [#updates[ 11800] train loss[nan] remaining[0:05:32]]
+2018-11-26 06:04:40 INFO     [#updates[ 11900] train loss[nan] remaining[0:04:13]]
+2018-11-26 06:06:01 INFO     [#updates[ 12000] train loss[nan] remaining[0:02:53]]
+2018-11-26 06:07:18 INFO     [#updates[ 12100] train loss[nan] remaining[0:01:34]]
+2018-11-26 06:08:36 INFO     [#updates[ 12200] train loss[nan] remaining[0:00:15]]
+
+You may want to consider changing your batch submission script as follows to speed up your job run next time:
+
+#PBS -l select=1:ncpus=28:mem=6gb
+#PBS -l place=free:shared
+#PBS -l walltime=02:56:00
+
+Your group changxuwu has been charged 02:51:04 for 28 cpus.
+You previously had 22528:37:24.  You now have 22448:47:32 remaining for the queue oc_standard

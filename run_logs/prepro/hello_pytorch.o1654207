@@ -1,0 +1,27 @@
+2018-11-22 03:03:39 WARNING  [~Processing SQuAD v2.0 dataset~]
+2018-11-22 03:03:39 INFO     [The path of training data: data/train-v2.0.json]
+2018-11-22 03:03:39 INFO     [The path of validation data: data/dev-v2.0.json]
+2018-11-22 03:03:39 INFO     [300-dim word vector path: data/glove.840B.300d.txt]
+2018-11-22 03:03:39 INFO     [Loading glove vocab.]
+2018-11-22 03:04:49 INFO     [Build vocabulary]
+Collect vocab/pos counter/ner counter
+Done with doc tokenize
+Done with question tokenize
+Raw vocab size vs vocab in glove: 106415/90949
+OOV rate:1.2000=262509/21875454
+final vocab size: 90953
+2018-11-22 03:07:52 INFO     [Done with vocabulary collection]
+2018-11-22 03:07:52 INFO     [Loading resource]
+2018-11-22 03:07:52 INFO     [building embedding]
+2018-11-22 03:08:49 INFO     [building training data]
+2018-11-22 03:37:39 INFO     [building dev data]
+2018-11-22 03:40:28 WARNING  [It totally took 36.81693773269653 minutes to processe the data!!]
+
+You may want to consider changing your batch submission script as follows to speed up your job run next time:
+
+#PBS -l select=1:ncpus=8:mem=15gb
+#PBS -l place=free:shared
+#PBS -l walltime=00:42:00
+
+Your group nirav has been charged 00:37:36 for 8 cpus.
+You previously had 4672:56:34.  You now have 4667:55:46 remaining for the queue oc_standard
