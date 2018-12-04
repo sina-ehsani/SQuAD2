@@ -117,7 +117,7 @@ def model_config(parser):
     return parser
 
 def data_config(parser):
-    parser.add_argument('--v2_on', action='store_true')
+    parser.add_argument('--v2_on', default=True , action='store_true')
     parser.add_argument('--log_file', default='san.log', help='path for log file.')
     parser.add_argument('--data_dir', default='data/')
     parser.add_argument('--meta', default='meta')
