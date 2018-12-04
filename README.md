@@ -61,19 +61,19 @@ For an easier run on HPC systems (HPC systems do not support Docker containers),
 
 ### Train the Model on SQuAD v2.0
 1. preprocess data
-   > python prepro.py --v2_on
+   > python prepro.py
 2. train a Model
-   > python train.py --v2_on
+   > python train.py
 
 ### Use of ELMo
 train a Model with ELMo
-   > python train.py --elmo_on --v2_on
+   > python train.py --elmo_on
 
 ### Train the Model on the diffrent preprocessed data (see section 4.1 of the paper)
 1. preprocess data
-   > python prepro2.py --v2_on
+   > python prepro2.py
 2. train a Model
-   > python train2.py --v2_on
+   > python train2.py
 
 ## Notes and Acknowledgments
 Most defentions were imported from: https://github.com/kevinduh/san_mrc <br/>
