@@ -1,5 +1,5 @@
 '''
-SAN model + Domain Adaptation + Elmo 
+SAN model + Domain Adaptation(after label prediction) + Elmo 
 Modified November, 2018
 Edited by: sina.ehsani@email.arizona.edu
 Originally Created by: xiaodl@microsoft.com
@@ -172,18 +172,16 @@ class DNetwork(nn.Module):
         # Domain Adoptation:
         
         query_domain =torch.cat([doc_sum,doc_sum,doc_sum],2)
-	        for i in range(len(query_mem_hiddens)):
-	        	if query_label is None:
-	        	    if label_prediction[i]==0:
-	        	        query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
-	        	    elif abel_prediction[i]==1:
-	        	        query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
-	        	elif query_label[i]==0:
-	        	    query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
-	        	elif query_label[i]==1:
-	        	    query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
-	        	    
-	    
+            for i in range(len(query_mem_hiddens)):
+                if query_label is None:
+                    if label_prediction[i]==0:
+                        query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
+                    elif abel_prediction[i]==1:
+                        query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
+                elif query_label[i]==0:
+                    query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
+                elif query_label[i]==1:
+                    query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
         start_scores, end_scores = self.decoder(doc_mem, query_domain, doc_mask)
 
             
