@@ -1,7 +1,8 @@
 '''
-SAN model
-Created October, 2017
-Author: xiaodl@microsoft.com
+SAN model + Domain Adaptation + Elmo 
+Modified November, 2018
+Edited by: sina.ehsani@email.arizona.edu
+Originally Created by: xiaodl@microsoft.com
 '''
 
 import torch
@@ -16,6 +17,19 @@ from .similarity import DeepAttentionWrapper, FlatSimilarityWrapper, SelfAttnWra
 from .similarity import AttentionWrapper
 from .san import SAN
 from .classifier import Classifier
+
+def predict(opt, batch, lab, top_k=1):
+
+    lab = lab.data.cpu()
+    text = batch['text']
+    label_predictions = []
+    max_len = opt['max_len'] or lab.size(1)
+    doc_len = lab.size(1)
+
+    for i in range(lab.size(0)):
+        label_score = float(lab[i])
+        label_predictions.append(label_score)
+    return (label_predictions)
 
 class DNetwork(nn.Module):
     """Network for SAN doc reader."""
@@ -71,12 +85,17 @@ class DNetwork(nn.Module):
             doc_mem_hidden_size = self.doc_mem_gen.output_size
         # Question merging
         self.query_sum_attn = SelfAttnWrapper(query_mem_hidden_size, prefix='query_sum', opt=opt, dropout=my_dropout)
-        self.decoder = SAN(doc_mem_hidden_size, query_mem_hidden_size, opt, prefix='decoder', dropout=my_dropout)
+        
+        
         if opt.get('v2_on', False):
             self.doc_sum_attn = SelfAttnWrapper(doc_mem_hidden_size, prefix='query_sum', opt=opt, dropout=my_dropout)
             self.classifier = Classifier(query_mem_hidden_size, opt['label_size'], opt=opt, prefix='classifier', dropout=my_dropout)
         else:
             self.classifier = None
+            
+        query_domain_size = query_sum_attn.output_size*3
+            
+        self.decoder = SAN(doc_mem_hidden_size, query_domain_size, opt, prefix='decoder', dropout=my_dropout)
         self.opt = opt
 
     def forward(self, batch):
@@ -85,7 +104,7 @@ class DNetwork(nn.Module):
         doc_cove_low, doc_cove_high,\
         query_cove_low, query_cove_high,\
         doc_mask, query_mask,\
-        doc_elmo, query_elmo = self.lexicon_encoder(batch)
+        doc_elmo, query_elmo, query_label = self.lexicon_encoder(batch)
 
         query_list, doc_list = [], []
         query_list.append(query_input)
@@ -143,10 +162,29 @@ class DNetwork(nn.Module):
         else:
             doc_mem = doc_mem_hiddens
         query_mem = self.query_sum_attn(query_mem_hiddens, query_mask)
-        start_scores, end_scores = self.decoder(doc_mem, query_mem, doc_mask)
-
+        
         pred_score = None
         if self.classifier is not None:
             doc_sum = self.doc_sum_attn(doc_mem, doc_mask)
             pred_score = F.sigmoid(self.classifier(doc_sum, query_mem, doc_mask))
+            label_prediction = predict(self.opt, batch, pred_score, top_k=1)
+        
+        # Domain Adoptation:
+        
+        query_domain =torch.cat([doc_sum,doc_sum,doc_sum],2)
+	        for i in range(len(query_mem_hiddens)):
+	        	if query_label is None:
+	        	    if label_prediction[i]==0:
+	        	        query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
+	        	    elif abel_prediction[i]==1:
+	        	        query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
+	        	elif query_label[i]==0:
+	        	    query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
+	        	elif query_label[i]==1:
+	        	    query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
+	        	    
+	    
+        start_scores, end_scores = self.decoder(doc_mem, query_domain, doc_mask)
+
+            
         return start_scores, end_scores, pred_score
