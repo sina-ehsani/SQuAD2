@@ -18,15 +18,18 @@ from .similarity import AttentionWrapper
 from .san import SAN
 from .classifier import Classifier
 
-import time
-import logging
-LOG_FORMAT= "%(levelname)s %(asctime)s:%(message)s"
-logging.basicConfig(filename="dreaderlog.log",
-                    level=logging.DEBUG,
-                    format= LOG_FORMAT,
-                    filemode='w')
-logger = logging.getLogger()
-start_time = time.time()
+def predict(opt, batch, lab, top_k=1):
+
+    lab = lab.data.cpu()
+    text = batch['text']
+    label_predictions = []
+    max_len = opt['max_len'] or lab.size(1)
+    doc_len = lab.size(1)
+
+    for i in range(lab.size(0)):
+        label_score = float(lab[i])
+        label_predictions.append(label_score)
+    return (label_predictions)
 
 class DNetwork(nn.Module):
     """Network for SAN doc reader."""
@@ -81,20 +84,18 @@ class DNetwork(nn.Module):
             self.doc_mem_gen = OneLayerBRNN(doc_mem_hidden_size, opt['msum_hidden_size'], 'msum', opt, my_dropout)
             doc_mem_hidden_size = self.doc_mem_gen.output_size
         # Question merging
-        #For the DomainAdoptation:
-        # query_mem_hidden_size=query_mem_hidden_size *3
-        query_domain_size = query_mem_hidden_size *3
-        self.query_domain_mem = OneLayerBRNN(query_domain_size, opt['msum_hidden_size'], prefix='domainadopt', opt=opt, dropout=my_dropout)
-        #--
-        query_mem_hidden_size=self.query_domain_mem.output_size
-        
         self.query_sum_attn = SelfAttnWrapper(query_mem_hidden_size, prefix='query_sum', opt=opt, dropout=my_dropout)
-        self.decoder = SAN(doc_mem_hidden_size, query_mem_hidden_size, opt, prefix='decoder', dropout=my_dropout)
+        
+        
         if opt.get('v2_on', False):
             self.doc_sum_attn = SelfAttnWrapper(doc_mem_hidden_size, prefix='query_sum', opt=opt, dropout=my_dropout)
             self.classifier = Classifier(query_mem_hidden_size, opt['label_size'], opt=opt, prefix='classifier', dropout=my_dropout)
         else:
             self.classifier = None
+            
+        query_domain_size = query_sum_attn.output_size*3
+            
+        self.decoder = SAN(doc_mem_hidden_size, query_domain_size, opt, prefix='decoder', dropout=my_dropout)
         self.opt = opt
 
     def forward(self, batch):
@@ -160,27 +161,28 @@ class DNetwork(nn.Module):
             doc_mem = self.doc_mem_gen(torch.cat([doc_mem_hiddens, doc_self_hiddens], 2), doc_mask)
         else:
             doc_mem = doc_mem_hiddens
+        query_mem = self.query_sum_attn(query_mem_hiddens, query_mask)
         
-        # The Domain Aoptation:
-        query_domain =torch.cat([query_mem_hiddens,query_mem_hiddens,query_mem_hiddens],2)
-        for i in range(len(query_mem_hiddens)):
-        	if query_label is None:
-        	    query_domain[i]=torch.cat([query_mem_hiddens[i],query_mem_hiddens[i],query_mem_hiddens[i]],1)
-        	elif query_label[i]==0:
-        	    query_domain[i]=torch.cat([query_mem_hiddens[i],torch.zeros_like(query_mem_hiddens[i]),query_mem_hiddens[i]],1)
-        	elif query_label[i]==1:
-        	    query_domain[i]=torch.cat([torch.zeros_like(query_mem_hiddens[i]),query_mem_hiddens[i],query_mem_hiddens[i]],1)
-        logger.info("query_domain size {} ".format(query_domain.shape))
-        
-        query_mem_hidden = self.query_domain_mem(query_domain, query_mask) 
-        
-        query_mem = self.query_sum_attn(query_mem_hidden, query_mask)
-        logger.info("query_mem size {} ".format(query_mem.shape))
-        start_scores, end_scores = self.decoder(doc_mem, query_mem, doc_mask)
-
         pred_score = None
         if self.classifier is not None:
             doc_sum = self.doc_sum_attn(doc_mem, doc_mask)
-            # doc_sum = torch.cat([doc_sum,doc_sum,doc_sum],1)
             pred_score = F.sigmoid(self.classifier(doc_sum, query_mem, doc_mask))
+            label_prediction = predict(self.opt, batch, pred_score, top_k=1)
+        
+        # Domain Adoptation:
+        
+        query_domain =torch.cat([doc_sum,doc_sum,doc_sum],2)
+        for i in range(len(query_mem_hiddens)):
+            if query_label is None:
+                if label_prediction[i]==0:
+                    query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
+                elif abel_prediction[i]==1:
+                    query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
+            elif query_label[i]==0:
+                query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
+            elif query_label[i]==1:
+                query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
+        start_scores, end_scores = self.decoder(doc_mem, query_domain, doc_mask)
+
+            
         return start_scores, end_scores, pred_score
