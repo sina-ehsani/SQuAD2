@@ -18,6 +18,8 @@ from .similarity import AttentionWrapper
 from .san import SAN
 from .classifier import Classifier
 
+import logging
+
 def predict(opt, batch, lab, top_k=1):
 
     lab = lab.data.cpu()
@@ -93,8 +95,10 @@ class DNetwork(nn.Module):
         else:
             self.classifier = None
             
-        query_domain_size = query_sum_attn.output_size*3
-            
+        query_domain_size = query_mem_hidden_size * 3
+        logging.warning(query_domain_size)
+
+        
         self.decoder = SAN(doc_mem_hidden_size, query_domain_size, opt, prefix='decoder', dropout=my_dropout)
         self.opt = opt
 
@@ -170,6 +174,7 @@ class DNetwork(nn.Module):
             label_prediction = predict(self.opt, batch, pred_score, top_k=1)
         
         # Domain Adoptation:
+        logging.warning(doc_sum)
         
         query_domain =torch.cat([doc_sum,doc_sum,doc_sum],2)
         for i in range(len(query_mem_hiddens)):
