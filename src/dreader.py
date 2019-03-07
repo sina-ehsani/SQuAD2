@@ -18,12 +18,21 @@ from .similarity import AttentionWrapper
 from .san import SAN
 from .classifier import Classifier
 
+# setup logger
 import logging
+from my_utils.log_wrapper import create_logger
+import argparse
+from config import set_args
+
+args = set_args()
+logger =  create_logger(__name__, to_disk=True, log_file=args.log_file)
 
 def predict(opt, batch, lab, top_k=1):
 
-    lab = lab.data.cpu()
-    text = batch['text']
+    # lab = lab.data.cpu()
+    # lab = lab.data.cuda(async=True)
+    lab = lab.data
+    # text = batch['text']
     label_predictions = []
     max_len = opt['max_len'] or lab.size(1)
     doc_len = lab.size(1)
@@ -96,7 +105,8 @@ class DNetwork(nn.Module):
             self.classifier = None
             
         query_domain_size = query_mem_hidden_size * 3
-        logging.warning(query_domain_size)
+        logger.warning('query_domain_size_init {}'.format(query_domain_size))
+        
 
         
         self.decoder = SAN(doc_mem_hidden_size, query_domain_size, opt, prefix='decoder', dropout=my_dropout)
@@ -171,22 +181,40 @@ class DNetwork(nn.Module):
         if self.classifier is not None:
             doc_sum = self.doc_sum_attn(doc_mem, doc_mask)
             pred_score = F.sigmoid(self.classifier(doc_sum, query_mem, doc_mask))
-            label_prediction = predict(self.opt, batch, pred_score, top_k=1)
+            label_predictions = predict(self.opt, batch, pred_score, top_k=1)
+            
+            pred_score2 = pred_score.data
+            # logger.warning('pred_score.data {}'.format(pred_score2))
+            # logger.warning('pred_score {}'.format(pred_score))
+            
+            label_predictions = []
+            # doc_len = pred_score.size(1)
+            # logger.warning('doc_len {}'.format(doc_len))
+            for i in range(pred_score2.size(0)):
+                label_score = torch.round(pred_score2[i])
+                # label_score=round(label_score)
+                label_predictions.append(label_score)
+            # logger.warning('label_predictions {}'.format(label_predictions))
         
         # Domain Adoptation:
-        logging.warning(doc_sum)
+        # logger.warning('query_mem {}'.format(query_mem.shape))
         
-        query_domain =torch.cat([doc_sum,doc_sum,doc_sum],2)
+        query_domain =torch.cat([query_mem,query_mem,query_mem],1) 
+        # logger.warning('query_domain {}'.format(query_domain.shape))
+        
         for i in range(len(query_mem_hiddens)):
             if query_label is None:
-                if label_prediction[i]==0:
-                    query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
-                elif abel_prediction[i]==1:
-                    query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
+                if label_predictions[i]==0:
+                    query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],0)
+                elif label_predictions[i]==1:
+                    query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],0)
             elif query_label[i]==0:
-                query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],1)
+                query_domain[i]=torch.cat([doc_sum[i],torch.zeros_like(doc_sum[i]),doc_sum[i]],0)
             elif query_label[i]==1:
-                query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],1)
+                query_domain[i]=torch.cat([torch.zeros_like(doc_sum[i]),doc_sum[i],doc_sum[i]],0)
+            
+        # logger.warning('query_domain {}'.format(query_domain))
+            
         start_scores, end_scores = self.decoder(doc_mem, query_domain, doc_mask)
 
             

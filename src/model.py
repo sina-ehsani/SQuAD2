@@ -93,7 +93,8 @@ class DocReaderModel(object):
         # assert (input >= 0. & input <= 1.).all()
         loss = F.cross_entropy(start, y[0]) + F.cross_entropy(end, y[1])
         if self.opt.get('v2_on', False):
-            loss = loss + F.binary_cross_entropy_with_logits(pred, torch.unsqueeze(label, 1)) * self.opt.get('classifier_gamma', 1)
+            # loss = loss + F.binary_cross_entropy_with_logits(pred, torch.unsqueeze(label, 1)) * self.opt.get('classifier_gamma', 1)
+            loss = loss + F.binary_cross_entropy(pred, torch.unsqueeze(label, 1)) * self.opt.get('classifier_gamma', 1)
 
         self.train_loss.update(loss.item(), len(start))
         self.optimizer.zero_grad()
